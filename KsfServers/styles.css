@@ -10,7 +10,7 @@ body {
   align-items: center;
 }
 ul {
-  font-size: 4vmin;
+  font-size: 5vmin;
 }
 @media (prefers-color-scheme: dark) {
   a {
