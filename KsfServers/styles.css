@@ -1,0 +1,23 @@
+a {
+  color:blue;
+  text-decoration:none;
+}
+body {
+  margin:0;
+  display:flex;
+  height:100vh;
+  justify-content:center;
+  align-items:center;
+}
+ul {
+  font-size:5vmin;
+}
+@media(prefers-color-scheme:dark) {
+  a {
+    color:#73b6f2;
+  }
+  body {
+    background-color:#202020;
+    color:#fbfbfe;
+  }
+}
