@@ -9,7 +9,7 @@ body {
   align-items: center;
 }
 ul {
-  font-size: 5vmin;
+  font-size: 4.5vh;
   list-style-type: none;
 }
 @media (prefers-color-scheme: dark) {
