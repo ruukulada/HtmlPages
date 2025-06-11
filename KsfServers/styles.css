@@ -10,6 +10,7 @@ body {
 }
 ul {
   font-size: 5vmin;
+  list-style-type: none;
 }
 @media (prefers-color-scheme: dark) {
   a {
