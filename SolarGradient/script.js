@@ -1,3 +1,14 @@
+function preloadImages() {
+  const imageFiles = Array.from({ length: 16 }, (_, i) => {
+    const n = String(i + 1).padStart(2, '0');
+    return `images/${n}.png`;
+  });
+  imageFiles.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });  
+}
+
 function findClosestImage(now, sunrise, sunset) {
   const offsets = [
     { label: "01.png", time: () => new Date(sunset.getTime() + 3 * 3600 * 1000) },
@@ -59,24 +70,50 @@ function tryIPLookup(resolve) {
         "America/Chicago": [41.8781, -87.6298],
         "America/Denver": [39.7392, -104.9903],
         "America/Los_Angeles": [34.0522, -118.2437],
+        "America/Phoenix": [33.4484, -112.0740],
+        "America/Anchorage": [61.2181, -149.9003],
+        "Pacific/Honolulu": [21.3069, -157.8583],
+        "America/Sao_Paulo": [-23.5505, -46.6333],
         "Europe/London": [51.5074, -0.1278],
-        "Europe/Berlin": [52.52, 13.4050],
-        "Asia/Tokyo": [35.6895, 139.6917],
+        "Europe/Paris": [48.8566, 2.3522],
+        "Europe/Berlin": [52.5200, 13.4050],
+        "Europe/Moscow": [55.7558, 37.6173],
+        "Africa/Johannesburg": [-26.2041, 28.0473],
+        "Asia/Dubai": [25.2048, 55.2708],
         "Asia/Kolkata": [28.6139, 77.2090],
+        "Asia/Bangkok": [13.7563, 100.5018],
+        "Asia/Singapore": [1.3521, 103.8198],
+        "Asia/Tokyo": [35.6895, 139.6917],
+        "Asia/Seoul": [37.5665, 126.9780],
+        "Asia/Shanghai": [31.2304, 121.4737],
+        "Asia/Hong_Kong": [22.3193, 114.1694],
+        "Asia/Jakarta": [-6.2088, 106.8456],
+        "Australia/Perth": [-31.9505, 115.8605],
+        "Australia/Adelaide": [-34.9285, 138.6007],
         "Australia/Sydney": [-33.8688, 151.2093],
-      };
+        "Pacific/Auckland": [-36.8485, 174.7633],
+        "Pacific/Fiji": [-17.7134, 178.0650]
+      };      
       resolve(fallbackMap[tz] || [40.0, -90.0]); // default: central US
     });
 }
 
+let currentImage = null;
 function guessLocationAndSetImage() {
   const now = new Date();
 
   getLatLonSmart().then(([lat, lon]) => {
     const times = SunCalc.getTimes(now, lat, lon);
-    const imageFile = findClosestImage(now, times.sunrise, times.sunset);
-    document.querySelector('.bg-layer').style.backgroundImage = `url('images/${imageFile}')`;
+    const newImage = findClosestImage(now, times.sunrise, times.sunset);
+    if (newImage !== currentImage) {
+      document.querySelector('.bg-layer').style.backgroundImage = `url('images/${newImage}')`;
+      currentImage = newImage;
+    }
   });
 }
 
 guessLocationAndSetImage();
+
+setInterval(() => {
+  guessLocationAndSetImage();
+}, 15 * 60 * 1000); // every 15 minutes

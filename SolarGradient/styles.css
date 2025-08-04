@@ -4,6 +4,8 @@ html, body {
   overflow: hidden;
 }
 .bg-layer {
+  background-image: url('images/05.png');
+  transition: background-image 1s ease-in-out;
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background-repeat: repeat-x;
