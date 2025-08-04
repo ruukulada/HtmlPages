@@ -33,15 +33,50 @@ function findClosestImage(now, sunrise, sunset) {
   return closest;
 }
 
+function getLatLonSmart() {
+  return new Promise((resolve) => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve([pos.coords.latitude, pos.coords.longitude]),
+        () => tryIPLookup(resolve),
+        { timeout: 5000 }
+      );
+    } else {
+      tryIPLookup(resolve);
+    }
+  });
+}
+
+function tryIPLookup(resolve) {
+  fetch('https://ipwho.is/')
+    .then(res => res.json())
+    .then(data => resolve([data.latitude, data.longitude]))
+    .catch(() => {
+      // fallback to time zone approximation
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const fallbackMap = {
+        "America/New_York": [40.7128, -74.0060],
+        "America/Chicago": [41.8781, -87.6298],
+        "America/Denver": [39.7392, -104.9903],
+        "America/Los_Angeles": [34.0522, -118.2437],
+        "Europe/London": [51.5074, -0.1278],
+        "Europe/Berlin": [52.52, 13.4050],
+        "Asia/Tokyo": [35.6895, 139.6917],
+        "Asia/Kolkata": [28.6139, 77.2090],
+        "Australia/Sydney": [-33.8688, 151.2093],
+      };
+      resolve(fallbackMap[tz] || [40.0, -90.0]); // default: central US
+    });
+}
+
 function guessLocationAndSetImage() {
   const now = new Date();
-  fetch('https://ipapi.co/json/')
-    .then(res => res.json())
-    .then(data => {
-      const times = SunCalc.getTimes(now, data.latitude, data.longitude);
-      const imageFile = findClosestImage(now, times.sunrise, times.sunset);
-      document.querySelector('.bg-layer').style.backgroundImage = `url('images/${imageFile}')`;
-    });
+
+  getLatLonSmart().then(([lat, lon]) => {
+    const times = SunCalc.getTimes(now, lat, lon);
+    const imageFile = findClosestImage(now, times.sunrise, times.sunset);
+    document.querySelector('.bg-layer').style.backgroundImage = `url('images/${imageFile}')`;
+  });
 }
 
 guessLocationAndSetImage();
