@@ -49,7 +49,6 @@ function guessLocationAndSetImage() {
   const times = SunCalc.getTimes(now, coords[0], coords[1]);
 
   const imageFile = findClosestImage(now, times.sunrise, times.sunset);
-  // document.body.style.backgroundImage = `url('images/${imageFile}')`;
   document.querySelector('.bg-layer').style.backgroundImage = `url('images/${imageFile}')`;
 }
 
