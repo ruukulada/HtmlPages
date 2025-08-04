@@ -112,6 +112,7 @@ function guessLocationAndSetImage() {
   });
 }
 
+preloadImages();
 guessLocationAndSetImage();
 
 setInterval(() => {
