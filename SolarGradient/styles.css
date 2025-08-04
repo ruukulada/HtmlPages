@@ -6,4 +6,5 @@ html,body {
   background-repeat:repeat-x;
   transition:background-image 1s ease-in-out;
   backdrop-filter:blur(1vh);
+  -webkit-backdrop-filter:blur(1vh);
 }
