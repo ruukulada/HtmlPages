@@ -34,15 +34,12 @@ function findClosestImage(now, sunrise, sunset) {
 }
 
 function guessLocationAndSetImage() {
+  const now = new Date();
   fetch('https://ipapi.co/json/')
     .then(res => res.json())
     .then(data => {
-      const lat = data.latitude;
-      const lon = data.longitude;
-
-      const times = SunCalc.getTimes(now, lat, lon);
+      const times = SunCalc.getTimes(now, data.latitude, data.longitude);
       const imageFile = findClosestImage(now, times.sunrise, times.sunset);
-
       document.querySelector('.bg-layer').style.backgroundImage = `url('images/${imageFile}')`;
     });
 }
