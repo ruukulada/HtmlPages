@@ -34,22 +34,17 @@ function findClosestImage(now, sunrise, sunset) {
 }
 
 function guessLocationAndSetImage() {
-  const now = new Date();
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  fetch('https://ipapi.co/json/')
+    .then(res => res.json())
+    .then(data => {
+      const lat = data.latitude;
+      const lon = data.longitude;
 
-  const tzMap = {
-    "America/New_York": [40.7128, -74.0060],
-    "America/Los_Angeles": [34.0522, -118.2437],
-    "Europe/Berlin": [52.52, 13.4050],
-    "Asia/Tokyo": [35.6895, 139.6917],
-    // Add more as needed
-  };
+      const times = SunCalc.getTimes(now, lat, lon);
+      const imageFile = findClosestImage(now, times.sunrise, times.sunset);
 
-  const coords = tzMap[timeZone] || [40.0, -90.0]; // Default if unknown
-  const times = SunCalc.getTimes(now, coords[0], coords[1]);
-
-  const imageFile = findClosestImage(now, times.sunrise, times.sunset);
-  document.querySelector('.bg-layer').style.backgroundImage = `url('images/${imageFile}')`;
+      document.querySelector('.bg-layer').style.backgroundImage = `url('images/${imageFile}')`;
+    });
 }
 
 guessLocationAndSetImage();
