@@ -101,26 +101,26 @@ function tryIPLookup(resolve) {
 function crossfadeToImage(newImagePath) {
   const front = document.querySelector('.front');
   const back = document.querySelector('.back');
-
   const img = new Image();
   img.src = newImagePath;
-
   img.onload = () => {
     front.style.backgroundImage = `url('${newImagePath}')`;
-
-    // Start fade once image is ready
+    front.style.transition = 'opacity 1s ease-in-out';
     front.style.opacity = '1';
-    back.style.opacity = '0';
-
+    setTimeout(() => {
+      back.style.transition = 'opacity 1s ease-in-out';
+      back.style.opacity = '0';
+    }, 1000);
     setTimeout(() => {
       front.classList.remove('front');
       front.classList.add('back');
       back.classList.remove('back');
       back.classList.add('front');
-    }, 1000); // Match transition duration
+      back.style.opacity = '0';
+      front.style.opacity = '1';
+    }, 2000);
   };
 }
-
 
 let currentImage = null;
 function guessLocationAndSetImage() {
