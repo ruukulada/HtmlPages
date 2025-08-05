@@ -11,22 +11,22 @@ function preloadImages() {
 
 function findClosestImage(now, sunrise, sunset) {
   const offsets = [
-    { label: "01.png", time: () => new Date(sunset.getTime() + 3 * 3600 * 1000) },
-    { label: "02.png", time: () => new Date(sunrise.getTime() - 3 * 3600 * 1000) },
-    { label: "03.png", time: () => new Date(sunrise.getTime() - 2 * 3600 * 1000) },
-    { label: "04.png", time: () => new Date(sunrise.getTime() - 1 * 3600 * 1000) },
-    { label: "05.png", time: () => new Date(sunrise.getTime() - 0.5 * 3600 * 1000) },
-    { label: "06.png", time: () => new Date(sunrise.getTime() + 0.5 * 3600 * 1000) },
-    { label: "07.png", time: () => new Date(sunrise.getTime() + 1 * 3600 * 1000) },
-    { label: "08.png", time: () => new Date(sunrise.getTime() + 2 * 3600 * 1000) },
-    { label: "09.png", time: () => new Date(sunrise.getTime() + 3 * 3600 * 1000) },
-    { label: "10.png", time: () => new Date(sunset.getTime() - 3 * 3600 * 1000) },
-    { label: "11.png", time: () => new Date(sunset.getTime() - 2 * 3600 * 1000) },
-    { label: "12.png", time: () => new Date(sunset.getTime() - 1 * 3600 * 1000) },
-    { label: "13.png", time: () => new Date(sunset.getTime() - 0.5 * 3600 * 1000) },
-    { label: "14.png", time: () => new Date(sunset.getTime() + 0.5 * 3600 * 1000) },
-    { label: "15.png", time: () => new Date(sunset.getTime() + 1 * 3600 * 1000) },
-    { label: "16.png", time: () => new Date(sunset.getTime() + 2 * 3600 * 1000) },
+    { label: "01.png", time: () => new Date(sunset + 3 * 3600 * 1000) },
+    { label: "02.png", time: () => new Date(sunrise - 3 * 3600 * 1000) },
+    { label: "03.png", time: () => new Date(sunrise - 2 * 3600 * 1000) },
+    { label: "04.png", time: () => new Date(sunrise - 1 * 3600 * 1000) },
+    { label: "05.png", time: () => new Date(sunrise - 0.5 * 3600 * 1000) },
+    { label: "06.png", time: () => new Date(sunrise + 0.5 * 3600 * 1000) },
+    { label: "07.png", time: () => new Date(sunrise + 1 * 3600 * 1000) },
+    { label: "08.png", time: () => new Date(sunrise + 2 * 3600 * 1000) },
+    { label: "09.png", time: () => new Date(sunrise + 3 * 3600 * 1000) },
+    { label: "10.png", time: () => new Date(sunset - 3 * 3600 * 1000) },
+    { label: "11.png", time: () => new Date(sunset - 2 * 3600 * 1000) },
+    { label: "12.png", time: () => new Date(sunset - 1 * 3600 * 1000) },
+    { label: "13.png", time: () => new Date(sunset - 0.5 * 3600 * 1000) },
+    { label: "14.png", time: () => new Date(sunset + 0.5 * 3600 * 1000) },
+    { label: "15.png", time: () => new Date(sunset + 1 * 3600 * 1000) },
+    { label: "16.png", time: () => new Date(sunset + 2 * 3600 * 1000) },
   ];
 
   let closest = null;
@@ -109,7 +109,7 @@ function guessLocationAndSetImage() {
     console.log(`Sun: rise=${times.sunrise}, set=${times.sunset}`);
     const positions = SunCalc.getPosition(now, lat, lon);
     console.log(`Sun: altitude=${positions.altitude}, azimuth=${positions.azimuth}`);
-    const newImage = findClosestImage(now, times.sunrise, times.sunset);
+    const newImage = findClosestImage(now, times.sunrise.getTime(), times.sunset.getTime());
     if (newImage !== currentImage) {
       crossfadeToImage(`images/${newImage}`);
       currentImage = newImage;
