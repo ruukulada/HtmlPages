@@ -14,7 +14,7 @@ function getClosestImageBySunPosition(azimuth, altitude) {
   let closest = null;
   let minDist = Infinity;
   for (const image of imgVectors) {
-    const imageVec = toCartesian(image.a*(180/Math.PI), image.z*(180/Math.PI));
+    const imageVec = toCartesian(image.a*(Math.PI/180), image.z*(Math.PI/180));
     const dist = euclideanDistance(currentVec, imageVec);
     if (dist < minDist) {
       minDist = dist;
