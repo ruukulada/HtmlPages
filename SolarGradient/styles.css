@@ -3,22 +3,35 @@ html, body {
   height: 100%;
   overflow: hidden;
 }
-.bg-layer {
-  background-image: url('images/01.png');
-  background-position: center center;
-  background-repeat: repeat-x;
-  background-size: 100% 100%;
-  transition: background-image 1s ease-in-out;
-
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 0;
-}
 .blur-overlay {
   backdrop-filter: blur(1vh);
   -webkit-backdrop-filter: blur(1vh);
 
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1;
+}
+.bg-container {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: -1;
+}
+.bg-layer {
+  background-image: url('images/01.png');
+  background-position: center center;
+  background-repeat: repeat-x;
+  background-size: 100% 100%;
+  transition: opacity 1s ease-in-out;
+
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+}
+.back {
+  opacity: 1;
+  z-index: 0;
+}
+.front {
+  opacity: 0;
   z-index: 1;
 }
