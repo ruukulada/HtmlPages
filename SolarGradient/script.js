@@ -133,7 +133,9 @@ function guessLocationAndSetImage() {
 }
 
 preloadImages();
-guessLocationAndSetImage();
+setTimeout(() => {
+  guessLocationAndSetImage();
+}, 500);
 
 setInterval(() => {
   guessLocationAndSetImage();
