@@ -98,6 +98,26 @@ function tryIPLookup(resolve) {
     });
 }
 
+function crossfadeToImage(newImagePath) {
+  const front = document.querySelector('.front');
+  const back = document.querySelector('.back');
+
+  // Set the new image on the front layer
+  front.style.backgroundImage = `url('${newImagePath}')`;
+
+  // Start fade
+  front.style.opacity = '1';
+  back.style.opacity = '0';
+
+  // After fade completes, swap roles
+  setTimeout(() => {
+    front.classList.remove('front');
+    front.classList.add('back');
+    back.classList.remove('back');
+    back.classList.add('front');
+  }, 1000); // Match CSS transition duration
+}
+
 let currentImage = null;
 function guessLocationAndSetImage() {
   const now = new Date();
@@ -106,7 +126,7 @@ function guessLocationAndSetImage() {
     const times = SunCalc.getTimes(now, lat, lon);
     const newImage = findClosestImage(now, times.sunrise, times.sunset);
     if (newImage !== currentImage) {
-      document.querySelector('.bg-layer').style.backgroundImage = `url('images/${newImage}')`;
+      crossfadeToImage(`images/${newImage}`);
       currentImage = newImage;
     }
   });
