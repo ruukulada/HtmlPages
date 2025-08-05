@@ -103,8 +103,8 @@ function crossfadeToImage(newImagePath) {
 let currentImage = null;
 function guessLocationAndSetImage() {
   const now = new Date();
-
   getLatLonSmart().then(([lat, lon]) => {
+    console.log(`Using coordinates: lat=${lat}, lon=${lon}`);
     const times = SunCalc.getTimes(now, lat, lon);
     const newImage = findClosestImage(now, times.sunrise, times.sunset);
     if (newImage !== currentImage) {
