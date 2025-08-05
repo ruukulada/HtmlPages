@@ -102,21 +102,25 @@ function crossfadeToImage(newImagePath) {
   const front = document.querySelector('.front');
   const back = document.querySelector('.back');
 
-  // Set the new image on the front layer
-  front.style.backgroundImage = `url('${newImagePath}')`;
+  const img = new Image();
+  img.src = newImagePath;
 
-  // Start fade
-  front.style.opacity = '1';
-  back.style.opacity = '0';
+  img.onload = () => {
+    front.style.backgroundImage = `url('${newImagePath}')`;
 
-  // After fade completes, swap roles
-  setTimeout(() => {
-    front.classList.remove('front');
-    front.classList.add('back');
-    back.classList.remove('back');
-    back.classList.add('front');
-  }, 1000); // Match CSS transition duration
+    // Start fade once image is ready
+    front.style.opacity = '1';
+    back.style.opacity = '0';
+
+    setTimeout(() => {
+      front.classList.remove('front');
+      front.classList.add('back');
+      back.classList.remove('back');
+      back.classList.add('front');
+    }, 1000); // Match transition duration
+  };
 }
+
 
 let currentImage = null;
 function guessLocationAndSetImage() {
