@@ -46,56 +46,63 @@ function findClosestImage(now, sunrise, sunset) {
 
 function getLatLonSmart() {
   return new Promise((resolve) => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        pos => resolve([pos.coords.latitude, pos.coords.longitude]),
-        () => tryIPLookup(resolve),
-        { timeout: 5000 }
-      );
-    } else {
-      tryIPLookup(resolve);
-    }
+    fetch('https://ipwho.is/')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.latitude && data.longitude) {
+          resolve([data.latitude, data.longitude]);
+        } else {
+          tryGeolocation(resolve);
+        }
+      })
+      .catch(() => tryGeolocation(resolve));
   });
 }
 
-function tryIPLookup(resolve) {
-  fetch('https://ipwho.is/')
-    .then(res => res.json())
-    .then(data => resolve([data.latitude, data.longitude]))
-    .catch(() => {
-      // fallback to time zone approximation
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const fallbackMap = {
-        "America/New_York": [40.7128, -74.0060],
-        "America/Chicago": [41.8781, -87.6298],
-        "America/Denver": [39.7392, -104.9903],
-        "America/Los_Angeles": [34.0522, -118.2437],
-        "America/Phoenix": [33.4484, -112.0740],
-        "America/Anchorage": [61.2181, -149.9003],
-        "Pacific/Honolulu": [21.3069, -157.8583],
-        "America/Sao_Paulo": [-23.5505, -46.6333],
-        "Europe/London": [51.5074, -0.1278],
-        "Europe/Paris": [48.8566, 2.3522],
-        "Europe/Berlin": [52.5200, 13.4050],
-        "Europe/Moscow": [55.7558, 37.6173],
-        "Africa/Johannesburg": [-26.2041, 28.0473],
-        "Asia/Dubai": [25.2048, 55.2708],
-        "Asia/Kolkata": [28.6139, 77.2090],
-        "Asia/Bangkok": [13.7563, 100.5018],
-        "Asia/Singapore": [1.3521, 103.8198],
-        "Asia/Tokyo": [35.6895, 139.6917],
-        "Asia/Seoul": [37.5665, 126.9780],
-        "Asia/Shanghai": [31.2304, 121.4737],
-        "Asia/Hong_Kong": [22.3193, 114.1694],
-        "Asia/Jakarta": [-6.2088, 106.8456],
-        "Australia/Perth": [-31.9505, 115.8605],
-        "Australia/Adelaide": [-34.9285, 138.6007],
-        "Australia/Sydney": [-33.8688, 151.2093],
-        "Pacific/Auckland": [-36.8485, 174.7633],
-        "Pacific/Fiji": [-17.7134, 178.0650]
-      };      
-      resolve(fallbackMap[tz] || [40.0, -90.0]); // default: central US
-    });
+function tryGeolocation(resolve) {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve([pos.coords.latitude, pos.coords.longitude]),
+      () => fallbackToTimezone(resolve),
+      { timeout: 5000 }
+    );
+  } else {
+    fallbackToTimezone(resolve);
+  }
+}
+
+function fallbackToTimezone(resolve) {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const fallbackMap = {
+    "America/New_York": [40.7128, -74.0060],
+    "America/Chicago": [41.8781, -87.6298],
+    "America/Denver": [39.7392, -104.9903],
+    "America/Los_Angeles": [34.0522, -118.2437],
+    "America/Phoenix": [33.4484, -112.0740],
+    "America/Anchorage": [61.2181, -149.9003],
+    "Pacific/Honolulu": [21.3069, -157.8583],
+    "America/Sao_Paulo": [-23.5505, -46.6333],
+    "Europe/London": [51.5074, -0.1278],
+    "Europe/Paris": [48.8566, 2.3522],
+    "Europe/Berlin": [52.5200, 13.4050],
+    "Europe/Moscow": [55.7558, 37.6173],
+    "Africa/Johannesburg": [-26.2041, 28.0473],
+    "Asia/Dubai": [25.2048, 55.2708],
+    "Asia/Kolkata": [28.6139, 77.2090],
+    "Asia/Bangkok": [13.7563, 100.5018],
+    "Asia/Singapore": [1.3521, 103.8198],
+    "Asia/Tokyo": [35.6895, 139.6917],
+    "Asia/Seoul": [37.5665, 126.9780],
+    "Asia/Shanghai": [31.2304, 121.4737],
+    "Asia/Hong_Kong": [22.3193, 114.1694],
+    "Asia/Jakarta": [-6.2088, 106.8456],
+    "Australia/Perth": [-31.9505, 115.8605],
+    "Australia/Adelaide": [-34.9285, 138.6007],
+    "Australia/Sydney": [-33.8688, 151.2093],
+    "Pacific/Auckland": [-36.8485, 174.7633],
+    "Pacific/Fiji": [-17.7134, 178.0650]
+  };
+  resolve(fallbackMap[tz] || [40.0, -90.0]); // default fallback: central US
 }
 
 function crossfadeToImage(newImagePath) {
