@@ -9,8 +9,8 @@ function preloadImages() {
   });  
 }
 
-function getClosestImageBySunPosition(currentAzimuth, currentAltitude) {
-  const currentVec = toCartesian(currentAzimuth, currentAltitude);
+function getClosestImageBySunPosition(azimuth, altitude) {
+  const currentVec = toCartesian(azimuth, altitude);
   let closest = null;
   let minDist = Infinity;
   for (const image of imgVectors) {
@@ -32,11 +32,7 @@ function toCartesian(altitude, azimuth) {
 }
 
 function euclideanDistance([x1, y1, z1], [x2, y2, z2]) {
-  return Math.sqrt(
-    (x1 - x2) ** 2 +
-    (y1 - y2) ** 2 +
-    (z1 - z2) ** 2
-  );
+  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2);
 }
 
 function getLatLonSmart() {
@@ -101,7 +97,7 @@ function guessLocationAndSetImage() {
   getLatLonSmart().then(([lat, lon]) => {
     console.log(`Using coordinates: lat=${lat}, lon=${lon}`);
     const times = SunCalc.getTimes(now, lat, lon);
-    console.log(`Sun: rise=${times.sunrise.getTime()}, set=${times.sunset.getTime()}`);
+    console.log(`Sun: rise=${times.sunrise.toTimeString()}, set=${times.sunset.toTimeString()}`);
     const pos = SunCalc.getPosition(now, lat, lon);
     console.log(`Sun: altitude=${pos.altitude*(180/Math.PI)}, azimuth=${(pos.azimuth+Math.PI)*(180/Math.PI)}`);
     const newImage = getClosestImageBySunPosition(pos.altitude, pos.azimuth+Math.PI);
