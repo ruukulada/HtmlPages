@@ -106,7 +106,7 @@ function guessLocationAndSetImage() {
     const times = SunCalc.getTimes(now, lat, lon);
     console.log(`Sun: rise=${times.sunrise}, set=${times.sunset}`);
     const positions = SunCalc.getPosition(now, lat, lon);
-    console.log(`Sun: altitude=${positions.altitude}, azimuth=${positions.azimuth}`);
+    console.log(`Sun: altitude=${positions.altitude*(180/Math.PI)}, azimuth=${positions.azimuth*(180/Math.PI)}`);
     const newImage = findClosestImage(now, times.sunrise.getTime(), times.sunset.getTime());
     if (newImage !== currentImage) {
       crossfadeToImage(`images/${newImage}`);
