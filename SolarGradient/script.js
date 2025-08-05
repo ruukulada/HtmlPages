@@ -9,37 +9,34 @@ function preloadImages() {
   });  
 }
 
-function findClosestImage(now, sunrise, sunset) {
-  const offsets = [
-    { label: "01.png", time: () => new Date(sunset + 3 * 3600 * 1000) },
-    { label: "02.png", time: () => new Date(sunrise - 3 * 3600 * 1000) },
-    { label: "03.png", time: () => new Date(sunrise - 2 * 3600 * 1000) },
-    { label: "04.png", time: () => new Date(sunrise - 1 * 3600 * 1000) },
-    { label: "05.png", time: () => new Date(sunrise - 0.5 * 3600 * 1000) },
-    { label: "06.png", time: () => new Date(sunrise + 0.5 * 3600 * 1000) },
-    { label: "07.png", time: () => new Date(sunrise + 1 * 3600 * 1000) },
-    { label: "08.png", time: () => new Date(sunrise + 2 * 3600 * 1000) },
-    { label: "09.png", time: () => new Date(sunrise + 3 * 3600 * 1000) },
-    { label: "10.png", time: () => new Date(sunset - 3 * 3600 * 1000) },
-    { label: "11.png", time: () => new Date(sunset - 2 * 3600 * 1000) },
-    { label: "12.png", time: () => new Date(sunset - 1 * 3600 * 1000) },
-    { label: "13.png", time: () => new Date(sunset - 0.5 * 3600 * 1000) },
-    { label: "14.png", time: () => new Date(sunset + 0.5 * 3600 * 1000) },
-    { label: "15.png", time: () => new Date(sunset + 1 * 3600 * 1000) },
-    { label: "16.png", time: () => new Date(sunset + 2 * 3600 * 1000) },
-  ];
-
+function getClosestImageBySunPosition(currentAzimuth, currentAltitude) {
+  const currentVec = toCartesian(currentAzimuth, currentAltitude);
   let closest = null;
-  let minDiff = Infinity;
-  offsets.forEach(entry => {
-    const target = entry.time();
-    const diff = Math.abs(now - target);
-    if (diff < minDiff) {
-      minDiff = diff;
-      closest = entry.label;
+  let minDist = Infinity;
+  for (const image of imgVectors) {
+    const imageVec = toCartesian(image.a*(180/Math.PI), image.z*(180/Math.PI));
+    const dist = euclideanDistance(currentVec, imageVec);
+    if (dist < minDist) {
+      minDist = dist;
+      closest = image.label;
     }
-  });
+  }
   return closest;
+}
+
+function toCartesian(altitude, azimuth) {
+  const x = Math.cos(altitude) * Math.sin(azimuth);
+  const y = Math.cos(altitude) * Math.cos(azimuth);
+  const z = Math.sin(altitude);
+  return [x, y, z];
+}
+
+function euclideanDistance([x1, y1, z1], [x2, y2, z2]) {
+  return Math.sqrt(
+    (x1 - x2) ** 2 +
+    (y1 - y2) ** 2 +
+    (z1 - z2) ** 2
+  );
 }
 
 function getLatLonSmart() {
@@ -104,10 +101,10 @@ function guessLocationAndSetImage() {
   getLatLonSmart().then(([lat, lon]) => {
     console.log(`Using coordinates: lat=${lat}, lon=${lon}`);
     const times = SunCalc.getTimes(now, lat, lon);
-    console.log(`Sun: rise=${times.sunrise}, set=${times.sunset}`);
-    const positions = SunCalc.getPosition(now, lat, lon);
-    console.log(`Sun: altitude=${positions.altitude*(180/Math.PI)}, azimuth=${(positions.azimuth+Math.PI)*(180/Math.PI)}`);
-    const newImage = findClosestImage(now, times.sunrise.getTime(), times.sunset.getTime());
+    console.log(`Sun: rise=${times.sunrise.getTime()}, set=${times.sunset.getTime()}`);
+    const pos = SunCalc.getPosition(now, lat, lon);
+    console.log(`Sun: altitude=${pos.altitude*(180/Math.PI)}, azimuth=${(pos.azimuth+Math.PI)*(180/Math.PI)}`);
+    const newImage = getClosestImageBySunPosition(azimuth, altitude + Math.PI);
     if (newImage !== currentImage) {
       crossfadeToImage(`images/${newImage}`);
       currentImage = newImage;
