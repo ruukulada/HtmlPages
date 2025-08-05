@@ -31,7 +31,6 @@ function findClosestImage(now, sunrise, sunset) {
 
   let closest = null;
   let minDiff = Infinity;
-
   offsets.forEach(entry => {
     const target = entry.time();
     const diff = Math.abs(now - target);
@@ -40,7 +39,6 @@ function findClosestImage(now, sunrise, sunset) {
       closest = entry.label;
     }
   });
-
   return closest;
 }
 
