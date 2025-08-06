@@ -135,6 +135,7 @@ const isStatic = new URLSearchParams(window.location.search).has('static');
 if (isStatic) {
   guessLocationAndSetImage(isStatic);
 } else {
+  document.body.classList.add('is-not-static');
   setTimeout(() => {
     guessLocationAndSetImage();
     preloadImages();
