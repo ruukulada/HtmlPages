@@ -1,3 +1,5 @@
+const params = new URLSearchParams(window.location.search);
+
 function preloadImages() {
   const imageFiles = Array.from({ length: 16 }, (_, i) => {
     const n = String(i + 1).padStart(2, '0');
@@ -37,6 +39,12 @@ function euclideanDistance([x1, y1, z1], [x2, y2, z2]) {
 
 function getLatLonSmart() {
   return new Promise((resolve) => {
+    const lat = parseFloat(params.get("lat"));
+    const lon = parseFloat(params.get("lon"));
+    if (!isNaN(lat) && !isNaN(lon)) {
+      resolve([lat, lon]);
+      return;
+    }
     fetch('https://ipwho.is/')
       .then(res => res.json())
       .then(data => {
@@ -131,13 +139,13 @@ function guessLocationAndSetImage(isStatic) {
   });
 }
 
-const isStatic = new URLSearchParams(window.location.search).has('static');
+const isStatic = params.has('static');
 if (isStatic) {
   guessLocationAndSetImage(isStatic);
 } else {
   document.body.classList.add('is-not-static');
   setTimeout(() => {
-    guessLocationAndSetImage();
+    guessLocationAndSetImage(isStatic);
     preloadImages();
   }, 500);
 }
