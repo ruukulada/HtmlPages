@@ -91,8 +91,26 @@ function crossfadeToImage(newImagePath) {
   };
 }
 
+function cutToImage(newImagePath) {
+  const front = document.querySelector('.front');
+  const back = document.querySelector('.back');
+  const img = new Image();
+  img.src = newImagePath;
+  img.onload = () => {
+    front.style.backgroundImage = `url('${newImagePath}')`;
+    front.style.transition = 'none';
+    front.style.opacity = '1';
+    back.style.transition = 'none';
+    back.style.opacity = '0';
+    front.classList.remove('front');
+    front.classList.add('back');
+    back.classList.remove('back');
+    back.classList.add('front');
+  };
+}
+
 let currentImage = null;
-function guessLocationAndSetImage() {
+function guessLocationAndSetImage(isStatic) {
   const now = new Date();
   getLatLonSmart().then(([lat, lon]) => {
     console.log(`Using coordinates: lat=${lat}, lon=${lon}`);
@@ -102,17 +120,27 @@ function guessLocationAndSetImage() {
     console.log(`Sun: altitude=${pos.altitude*(180/Math.PI)}, azimuth=${(pos.azimuth+Math.PI)*(180/Math.PI)}`);
     const newImage = getClosestImageBySunPosition(pos.altitude, pos.azimuth+Math.PI);
     if (newImage !== currentImage) {
-      crossfadeToImage(`images/${newImage}`);
+      if(isStatic){
+        cutToImage(`images/${newImage}`);
+      }
+      else{
+        crossfadeToImage(`images/${newImage}`);
+      }
       currentImage = newImage;
     }
   });
 }
 
-preloadImages();
-setTimeout(() => {
-  guessLocationAndSetImage();
-}, 500);
+const isStatic = new URLSearchParams(window.location.search).has('static');
+if (isStatic) {
+  guessLocationAndSetImage(isStatic);
+} else {
+  setTimeout(() => {
+    guessLocationAndSetImage();
+    preloadImages();
+  }, 500);
+}
 
 setInterval(() => {
-  guessLocationAndSetImage();
+  guessLocationAndSetImage(isStatic);
 }, 15 * 60 * 1000); // every 15 minutes
