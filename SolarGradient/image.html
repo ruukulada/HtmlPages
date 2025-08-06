@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting to image...</title>
+  <script src="https://unpkg.com/suncalc/suncalc.js"></script>
+  <script src="constants/image-vectors.js"></script>
+  <script src="constants/timezone-coords.js"></script>
+  <script src="script.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const lat = parseFloat(params.get("lat"));
+    const lon = parseFloat(params.get("lon"));
+
+    if (!isNaN(lat) && !isNaN(lon)) {
+      const now = new Date();
+      const pos = SunCalc.getPosition(now, lat, lon);
+      const image = getClosestImageBySunPosition(pos.altitude, pos.azimuth + Math.PI);
+      window.location.href = `images/${image}`;
+    } else {
+      document.body.textContent = "Missing or invalid coordinates.";
+    }
+  </script>
+</head>
+<body></body>
+</html>
