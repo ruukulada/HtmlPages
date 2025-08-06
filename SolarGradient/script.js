@@ -41,7 +41,9 @@ function getLatLonSmart() {
   return new Promise((resolve) => {
     const lat = parseFloat(params.get("lat"));
     const lon = parseFloat(params.get("lon"));
-    if (!isNaN(lat) && !isNaN(lon)) {
+    const isValidLat = !isNaN(lat) && lat >= -90 && lat <= 90;
+    const isValidLon = !isNaN(lon) && lon >= -180 && lon <= 180;
+    if (isValidLat && isValidLon) {
       resolve([lat, lon]);
       return;
     }
