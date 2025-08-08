@@ -160,7 +160,7 @@ function guessLocationAndSetImage(isStatic) {
     const pos = SunCalc.getPosition(now, lat, lon);
     console.log(`Sun: altitude=${pos.altitude*(180/Math.PI)}, azimuth=${(pos.azimuth+Math.PI)*(180/Math.PI)}`);
     const newImageNdx = getClosestImageBySunPosition(pos.altitude, pos.azimuth+Math.PI);
-    const newImage = gradientStrings[ndx];
+    const newImage = gradientStrings[newImageNdx];
     if (newImageNdx !== currentImageNdx) {
       if(isStatic){
         cutToImage(newImage);
