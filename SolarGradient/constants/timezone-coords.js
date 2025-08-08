@@ -1,4 +1,4 @@
-const tzCoords = {
+export const tzCoords = {
   "Africa/Abidjan": [5.3167, -4.0333],
   "Africa/Algiers": [36.1333, 3.0500],
   "Africa/Bissau": [11.8500, -15.5833],

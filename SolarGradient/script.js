@@ -73,8 +73,13 @@ function tryGeolocation(resolve) {
 }
 
 function fallbackToTimezone(resolve) {
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  resolve(tzCoords[tz] || [40.0, -90.0]);
+  import('./constants/timezone-coords.js')
+  .then(module => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    resolve(module.tzCoords[tz] || [0.0, 0.0]);
+  }).catch(() => {
+      resolve([0.0, 0.0]);
+  });
 }
 
 function crossfadeToImage(newImagePath) {
