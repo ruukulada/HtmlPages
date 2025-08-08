@@ -2,14 +2,16 @@ const params = new URLSearchParams(window.location.search);
 
 function getClosestImageBySunPosition(azimuth, altitude) {
   const currentVec = toCartesian(azimuth, altitude);
+  let ndx = 0;
   let closest = null;
   let minDist = Infinity;
   for (const image of imgVectors) {
+    ndx++;
     const imageVec = toCartesian(image.a*(Math.PI/180), image.z*(Math.PI/180));
     const dist = euclideanDistance(currentVec, imageVec);
     if (dist < minDist) {
       minDist = dist;
-      closest = image.label;
+      closest = ndx.toString().padStart(2, '0');
     }
   }
   return closest;
@@ -125,10 +127,10 @@ function guessLocationAndSetImage(isStatic) {
     const newImage = getClosestImageBySunPosition(pos.altitude, pos.azimuth+Math.PI);
     if (newImage !== currentImage) {
       if(isStatic){
-        cutToImage(`images/${newImage}`);
+        cutToImage(`images/${newImage}.png`);
       }
       else{
-        crossfadeToImage(`images/${newImage}`);
+        crossfadeToImage(`images/${newImage}.png`);
       }
       currentImage = newImage;
     }
