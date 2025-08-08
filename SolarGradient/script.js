@@ -1,16 +1,5 @@
 const params = new URLSearchParams(window.location.search);
 
-function preloadImages() {
-  const imageFiles = Array.from({ length: 16 }, (_, i) => {
-    const n = String(i + 1).padStart(2, '0');
-    return `images/${n}.png`;
-  });
-  imageFiles.forEach(src => {
-    const img = new Image();
-    img.src = src;
-  });  
-}
-
 function getClosestImageBySunPosition(azimuth, altitude) {
   const currentVec = toCartesian(azimuth, altitude);
   let closest = null;
@@ -153,7 +142,6 @@ if (isStatic) {
   document.body.classList.add('is-not-static');
   setTimeout(() => {
     guessLocationAndSetImage(isStatic);
-    preloadImages();
   }, 500);
 }
 
