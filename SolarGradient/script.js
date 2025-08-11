@@ -139,8 +139,6 @@ function euclideanDistance([x1, y1, z1], [x2, y2, z2]) {
 function setImage(isStatic) {
   const now = new Date();
   console.log(`Using coordinates: lat=${lat}, lon=${lon}`);
-  const times = SunCalc.getTimes(now, lat, lon);
-  console.log(`Sun: rise=${times.sunrise.toTimeString()}, set=${times.sunset.toTimeString()}`);
   const pos = SunCalc.getPosition(now, lat, lon);
   console.log(`Sun: altitude=${pos.altitude*(180/Math.PI)}, azimuth=${(pos.azimuth+Math.PI)*(180/Math.PI)}`);
   const newImageNdx = getClosestImageBySunPosition(pos.altitude, pos.azimuth+Math.PI);
