@@ -1,20 +1,20 @@
 .bg-layer {
-  background-position: center center;
-  background-repeat: repeat-x;
-  background-size: 100% 100%;
-  transition: opacity 1s ease-in-out;
+  background-position:center center;
+  background-repeat:repeat-x;
+  background-size:100% 100%;
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 0;
+  top:0;left:0;right:0;bottom:0;
+  transition: opacity 1s ease-in-out;
+  z-index:0;
 }
 body.is-not-static .back {
   background-image: linear-gradient(to bottom, #05091F 0.0%, #04091F 5.26%, #050A21 10.53%, #050A22 15.79%, #050A23 21.05%, #060B25 26.32%, #070C28 31.58%, #070C2A 36.84%, #080E2E 42.11%, #070E31 47.37%, #091035 52.63%, #0A113A 57.89%, #0B1440 63.16%, #0D1647 68.42%, #0E184F 73.68%, #101C5A 78.95%, #132067 84.21%, #192677 89.47%, #1E2E89 94.74%, #24359A 100.0%);
 }
 .back {
-  opacity: 1;
-  z-index: 0;
+  opacity:1;
+  z-index:0;
 }
 .front {
-  opacity: 0;
-  z-index: 1;
+  opacity:0;
+  z-index:1;
 }
