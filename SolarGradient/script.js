@@ -1,5 +1,3 @@
-const params = new URLSearchParams(window.location.search);
-
 const imgVectors = [
   { a: -87.61464321640851, z: 260.5898004255673 },
   { a: -17.107833232320647, z: 90.19641045280235 },
@@ -38,6 +36,78 @@ const gradientStrings = [
   'linear-gradient(to bottom, #0F142D 0.0%, #10152F 5.26%, #111732 10.53%, #111833 15.79%, #111936 21.05%, #131A3A 26.32%, #141B3D 31.58%, #161E40 36.84%, #171F45 42.11%, #19224A 47.37%, #1C254F 52.63%, #1E2856 57.89%, #212C5D 63.16%, #253066 68.42%, #29366F 73.68%, #2F3D7B 78.95%, #374687 84.21%, #425194 89.47%, #515FA0 94.74%, #606EA5 100.0%)'
 ];
 
+const params = new URLSearchParams(window.location.search);
+const isStatic = params.has('static');
+let currentImageNdx = null;
+let lat, lon;
+
+getLatLonSmart().then(([resolvedLat, resolvedLon]) => {
+  lat = resolvedLat;
+  lon = resolvedLon;
+  if (isStatic) {
+    setImage(isStatic);
+  } else {
+    document.body.classList.add('is-not-static');
+    setTimeout(() => {
+      setImage(isStatic);
+    }, 500);
+  }
+  setInterval(() => {
+    setImage(isStatic);
+  }, 5 * 60 * 1000); // every 5 minutes
+});
+
+function getLatLonSmart() {
+  return new Promise((resolve) => {
+    const paramLat = parseFloat(params.get("lat"));
+    const paramLon = parseFloat(params.get("lon"));
+    if (isValidLatLon(paramLat, paramLon)) {
+      resolve([paramLat, paramLon]);
+      return;
+    }
+    tryIpLookup(resolve);
+  });
+}
+
+function tryIpLookup(resolve) {
+  fetch('https://ipwho.is/')
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.latitude && data.longitude) {
+        resolve([data.latitude, data.longitude]);
+      } else {
+        tryGeolocation(resolve);
+      }
+    })
+    .catch(() => tryGeolocation(resolve));
+}
+
+function tryGeolocation(resolve) {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve([pos.coords.latitude, pos.coords.longitude]),
+      () => tryTimezone(resolve),
+      { timeout: 5000 }
+    );
+  } else {
+    tryTimezone(resolve);
+  }
+}
+
+function tryTimezone(resolve) {
+  import('./constants/timezone-coords.js')
+  .then(module => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    resolve(module.tzCoords[tz] || [0.0, 0.0]);
+  }).catch(() => {
+      resolve([0.0, 0.0]);
+  });
+}
+
+function isValidLatLon(lat, lon) {
+  return !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+}
+
 function getClosestImageBySunPosition(azimuth, altitude) {
   const currentVec = toCartesian(azimuth, altitude);
   let ndx = 0;
@@ -66,49 +136,24 @@ function euclideanDistance([x1, y1, z1], [x2, y2, z2]) {
   return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2);
 }
 
-function getLatLonSmart() {
-  return new Promise((resolve) => {
-    const lat = parseFloat(params.get("lat"));
-    const lon = parseFloat(params.get("lon"));
-    const isValidLat = !isNaN(lat) && lat >= -90 && lat <= 90;
-    const isValidLon = !isNaN(lon) && lon >= -180 && lon <= 180;
-    if (isValidLat && isValidLon) {
-      resolve([lat, lon]);
-      return;
+function setImage(isStatic) {
+  const now = new Date();
+  console.log(`Using coordinates: lat=${lat}, lon=${lon}`);
+  const times = SunCalc.getTimes(now, lat, lon);
+  console.log(`Sun: rise=${times.sunrise.toTimeString()}, set=${times.sunset.toTimeString()}`);
+  const pos = SunCalc.getPosition(now, lat, lon);
+  console.log(`Sun: altitude=${pos.altitude*(180/Math.PI)}, azimuth=${(pos.azimuth+Math.PI)*(180/Math.PI)}`);
+  const newImageNdx = getClosestImageBySunPosition(pos.altitude, pos.azimuth+Math.PI);
+  if (newImageNdx !== currentImageNdx) {
+    const newImage = gradientStrings[newImageNdx];
+    if (isStatic) {
+      cutToImage(newImage);
     }
-    fetch('https://ipwho.is/')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.latitude && data.longitude) {
-          resolve([data.latitude, data.longitude]);
-        } else {
-          tryGeolocation(resolve);
-        }
-      })
-      .catch(() => tryGeolocation(resolve));
-  });
-}
-
-function tryGeolocation(resolve) {
-  if ('geolocation' in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      pos => resolve([pos.coords.latitude, pos.coords.longitude]),
-      () => fallbackToTimezone(resolve),
-      { timeout: 5000 }
-    );
-  } else {
-    fallbackToTimezone(resolve);
+    else {
+      crossfadeToImage(newImage);
+    }
+    currentImageNdx = newImageNdx;
   }
-}
-
-function fallbackToTimezone(resolve) {
-  import('./constants/timezone-coords.js')
-  .then(module => {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    resolve(module.tzCoords[tz] || [0.0, 0.0]);
-  }).catch(() => {
-      resolve([0.0, 0.0]);
-  });
 }
 
 function crossfadeToImage(newImage) {
@@ -149,40 +194,3 @@ function cutToImage(newImage) {
   back.classList.remove('back');
   back.classList.add('front');
 }
-
-let currentImageNdx = null;
-function guessLocationAndSetImage(isStatic) {
-  const now = new Date();
-  getLatLonSmart().then(([lat, lon]) => {
-    console.log(`Using coordinates: lat=${lat}, lon=${lon}`);
-    const times = SunCalc.getTimes(now, lat, lon);
-    console.log(`Sun: rise=${times.sunrise.toTimeString()}, set=${times.sunset.toTimeString()}`);
-    const pos = SunCalc.getPosition(now, lat, lon);
-    console.log(`Sun: altitude=${pos.altitude*(180/Math.PI)}, azimuth=${(pos.azimuth+Math.PI)*(180/Math.PI)}`);
-    const newImageNdx = getClosestImageBySunPosition(pos.altitude, pos.azimuth+Math.PI);
-    const newImage = gradientStrings[newImageNdx];
-    if (newImageNdx !== currentImageNdx) {
-      if(isStatic){
-        cutToImage(newImage);
-      }
-      else{
-        crossfadeToImage(newImage);
-      }
-      currentImageNdx = newImageNdx;
-    }
-  });
-}
-
-const isStatic = params.has('static');
-if (isStatic) {
-  guessLocationAndSetImage(isStatic);
-} else {
-  document.body.classList.add('is-not-static');
-  setTimeout(() => {
-    guessLocationAndSetImage(isStatic);
-  }, 500);
-}
-
-setInterval(() => {
-  guessLocationAndSetImage(isStatic);
-}, 15 * 60 * 1000); // every 15 minutes
