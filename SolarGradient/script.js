@@ -110,17 +110,15 @@ function isValidLatLon(lat, lon) {
 
 function getClosestImageBySunPosition(azimuth, altitude) {
   const currentVec = toCartesian(azimuth, altitude);
-  let ndx = 0;
-  let closest = null;
+  let closestIndex = -1;
   let minDist = Infinity;
-  for (const image of imgVectors) {
-    const imageVec = toCartesian(image.a*(Math.PI/180), image.z*(Math.PI/180));
+  for (const [index, image] of imgVectors.entries()) {
+    const imageVec = toCartesian(image.a * (Math.PI/180), image.z * (Math.PI/180));
     const dist = euclideanDistance(currentVec, imageVec);
     if (dist < minDist) {
       minDist = dist;
-      closest = ndx;
+      closestIndex = index;
     }
-    ndx++;
   }
   return closest;
 }
