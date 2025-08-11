@@ -38,9 +38,8 @@ const gradientStrings = [
 
 const params = new URLSearchParams(window.location.search);
 const isStatic = params.has('static');
-let currentImageNdx = null;
-let lat, lon;
 
+let lat, lon;
 getLatLonSmart().then(([resolvedLat, resolvedLon]) => {
   lat = resolvedLat;
   lon = resolvedLon;
@@ -120,7 +119,7 @@ function getClosestImageBySunPosition(azimuth, altitude) {
       closestIndex = index;
     }
   }
-  return closest;
+  return closestIndex;
 }
 
 function toCartesian(altitude, azimuth) {
@@ -134,6 +133,7 @@ function euclideanDistance([x1, y1, z1], [x2, y2, z2]) {
   return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2);
 }
 
+let currentImageNdx = null;
 function setImage(isStatic) {
   const now = new Date();
   console.log(`Using coordinates: lat=${lat}, lon=${lon}`);
