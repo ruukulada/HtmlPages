@@ -69,7 +69,7 @@ function getLatLonSmart() {
 }
 
 function tryIpLookup(resolve) {
-  fetch('https://ipwho.is/')
+  fetch('https://ipwho.is/?fields=success,latitude,longitude')
     .then(res => res.json())
     .then(data => {
       if (data.success && data.latitude && data.longitude) {
