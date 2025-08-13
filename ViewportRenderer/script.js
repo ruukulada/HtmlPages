@@ -65,7 +65,7 @@ function drawHeatmap(time) {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const cellSize = Math.min(canvas.width, canvas.height) / 100;
+  const cellSize = Math.max(canvas.width, canvas.height) / 100;
   const cols = Math.floor(canvas.width / cellSize);
   const rows = Math.floor(canvas.height / cellSize);
 
