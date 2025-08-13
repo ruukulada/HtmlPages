@@ -5,40 +5,89 @@ const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 const ctx = canvas.getContext("2d");
 
-function drawGrid(time) {
-  const t = time * 0.002;
+const noise = (() => {
+  const perm = new Uint8Array(512);
+  for (let i = 0; i < 256; i++) perm[i] = i;
+  for (let i = 0; i < 256; i++) {
+    const j = Math.floor(Math.random() * 256);
+    [perm[i], perm[j]] = [perm[j], perm[i]];
+    perm[i + 256] = perm[i];
+  }
+  const fade = t => t * t * t * (t * (t * 6 - 15) + 10);
+  const lerp = (t, a, b) => a + t * (b - a);
+  const grad = (hash, x, y) => {
+    const h = hash & 3;
+    const u = h < 2 ? x : y;
+    const v = h < 2 ? y : x;
+    return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+  };
+  return (x, y) => {
+    const X = Math.floor(x) & 255;
+    const Y = Math.floor(y) & 255;
+    const xf = x - Math.floor(x);
+    const yf = y - Math.floor(y);
+    const u = fade(xf);
+    const v = fade(yf);
+    const aa = perm[X + perm[Y]];
+    const ab = perm[X + perm[Y + 1]];
+    const ba = perm[X + 1 + perm[Y]];
+    const bb = perm[X + 1 + perm[Y + 1]];
+    const x1 = lerp(u, grad(aa, xf, yf), grad(ba, xf - 1, yf));
+    const x2 = lerp(u, grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1));
+    return lerp(v, x1, x2);
+  };
+})();
 
+const heatmap = [
+  [  0,  0,100],
+  [  0,  0,200],
+  [200,  0,  0],
+  [255,165,  0],
+  [255,220,255]
+];
+
+function getColorFromPalette(t) {
+  t = Math.min(Math.max(t, 0), 1);
+  const n = heatmap.length - 1;
+  const idx = Math.floor(t * n);
+  const frac = t * n - idx;
+  const c0 = heatmap[idx];
+  const c1 = heatmap[Math.min(idx + 1, n)];
+  return [
+    Math.floor(c0[0] + (c1[0] - c0[0]) * frac),
+    Math.floor(c0[1] + (c1[1] - c0[1]) * frac),
+    Math.floor(c0[2] + (c1[2] - c0[2]) * frac)
+  ];
+}
+
+function drawHeatmap(time) {
+  const t = time * 0.001;
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const cellSize = Math.max(canvas.width, canvas.height) / 100;
-  const marginCells = 1;
+  const cellSize = Math.min(canvas.width, canvas.height) / 100;
+  const cols = Math.floor(canvas.width / cellSize);
+  const rows = Math.floor(canvas.height / cellSize);
 
-  const cols = Math.floor(canvas.width / cellSize) + marginCells * 2;
-  const rows = Math.floor(canvas.height / cellSize) + marginCells * 2;
+  ctx.imageSmoothingEnabled = false;
 
-  const startX = -marginCells * cellSize;
-  const startY = -marginCells * cellSize;
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const n = noise(x * 0.1 + t, y * 0.1 + t);
+      const vNoise = (n + 1) / 2; // 0..1
 
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const v = (Math.sin((col - marginCells) * 0.2 + t) +
-                 Math.sin((row - marginCells) * 0.2 + t)) / 2 * 0.5 + 0.5;
+      const gradient = x / cols * 0.5 + y / rows * 0.5;
 
-      const r = Math.floor(100 + 155 * v);
-      const g = Math.floor(50 * (1 - v));
-      const b = Math.floor(150 + 105 * v);
+      const value = Math.min(Math.max(vNoise + gradient * 0.5, 0), 1);
+
+      const [r, g, b] = getColorFromPalette(value);
 
       ctx.fillStyle = `rgb(${r},${g},${b})`;
-      ctx.fillRect(
-        Math.round(startX + col * cellSize),
-        Math.round(startY + row * cellSize),
-        Math.ceil(cellSize),
-        Math.ceil(cellSize));
+      ctx.fillRect(Math.round(x * cellSize), Math.round(y * cellSize), Math.ceil(cellSize), Math.ceil(cellSize));
     }
   }
 
-  requestAnimationFrame(drawGrid);
+  requestAnimationFrame(drawHeatmap);
 }
 
-requestAnimationFrame(drawGrid);
+requestAnimationFrame(drawHeatmap);
