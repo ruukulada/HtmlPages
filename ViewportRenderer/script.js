@@ -39,11 +39,14 @@ const noise = (() => {
 })();
 
 const heatmap = [
-  [  0,  0,100],
-  [  0,  0,200],
-  [200,  0,  0],
-  [255,165,  0],
-  [255,220,255]
+  [0,0,175],
+  [0,0,150],
+  [0,0,125],
+  [25,0,100],
+  [50,0,100],
+  [125,0,0],
+  [250,125,0],
+  [250,200,0],
 ];
 
 function getColorFromPalette(t) {
@@ -61,7 +64,7 @@ function getColorFromPalette(t) {
 }
 
 function drawHeatmap(time) {
-  const t = time * 0.001;
+  const t = time * 0.0005;
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
@@ -73,7 +76,7 @@ function drawHeatmap(time) {
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
-      const n = noise(x * 0.1 + t, y * 0.1 + t);
+      const n = noise(x * 0.04 + t, y * 0.04 + t);
       const vNoise = (n + 1) / 2; // 0..1
 
       const gradient = x / cols * 0.5 + y / rows * 0.5;
