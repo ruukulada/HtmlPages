@@ -109,7 +109,7 @@ let cols, rows, cellSize;
 function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  cellSize = Math.min(canvas.width, canvas.height) / 100;
+  cellSize = Math.max(canvas.width, canvas.height) / 100;
   cols = Math.ceil(canvas.width / cellSize);
   rows = Math.ceil(canvas.height / cellSize);
 }
