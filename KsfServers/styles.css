@@ -9,6 +9,7 @@ body {
   align-items: center;
 }
 ul {
+  font-family: sans-serif;
   font-size: 4.5vh;
   list-style-type: none;
   text-shadow: 0px 0px 0.3vh pink;
