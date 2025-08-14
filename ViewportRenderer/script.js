@@ -1,96 +1,123 @@
-document.body.style.margin = "0";
-document.body.style.overflow = "hidden";
-
-const canvas = document.createElement("canvas");
-document.body.appendChild(canvas);
-const ctx = canvas.getContext("2d");
-
-const noise = (() => {
-  const perm = new Uint8Array(512);
-  for (let i = 0; i < 256; i++) perm[i] = i;
-  for (let i = 0; i < 256; i++) {
-    const j = Math.floor(Math.random() * 256);
-    [perm[i], perm[j]] = [perm[j], perm[i]];
-    perm[i + 256] = perm[i];
+class SimplexNoise {
+  constructor() {
+    this.grad3 = [
+      [1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
+      [1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
+      [0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]
+    ];
+    this.p = [];
+    for (let i = 0; i < 256; i++) {
+      this.p[i] = Math.floor(Math.random()*256);
+    }
+    this.perm = [];
+    for (let i = 0; i < 512; i++) {
+      this.perm[i] = this.p[i & 255];
+    }
+    this.simplex = [
+      [0,1,2,3],[0,1,3,2],[0,0,0,0],[0,2,3,1],
+      [0,0,0,0],[0,0,0,0],[0,3,1,2],[0,3,2,1],
+      [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+      [1,2,3,0],[1,3,0,2],[1,0,2,3],[1,0,3,2],
+      [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+      [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+      [2,3,0,1],[2,0,1,3],[2,1,3,0],[2,1,0,3],
+      [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+      [3,0,1,2],[3,0,2,1],[3,1,2,0],[3,1,0,2]
+    ];
   }
-  const fade = t => t * t * t * (t * (t * 6 - 15) + 10);
-  const lerp = (t, a, b) => a + t * (b - a);
-  const grad = (hash, x, y) => {
-    const h = hash & 3;
-    const u = h < 2 ? x : y;
-    const v = h < 2 ? y : x;
-    return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
-  };
-  return (x, y) => {
-    const X = Math.floor(x) & 255;
-    const Y = Math.floor(y) & 255;
-    const xf = x - Math.floor(x);
-    const yf = y - Math.floor(y);
-    const u = fade(xf);
-    const v = fade(yf);
-    const aa = perm[X + perm[Y]];
-    const ab = perm[X + perm[Y + 1]];
-    const ba = perm[X + 1 + perm[Y]];
-    const bb = perm[X + 1 + perm[Y + 1]];
-    const x1 = lerp(u, grad(aa, xf, yf), grad(ba, xf - 1, yf));
-    const x2 = lerp(u, grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1));
-    return lerp(v, x1, x2);
-  };
-})();
-
-const heatmap = [
-  [0,0,175],
-  [0,0,150],
-  [0,0,125],
-  [25,0,100],
-  [50,0,100],
-  [125,0,0],
-  [250,125,0],
-  [250,200,0],
-];
-
-function getColorFromPalette(t) {
-  t = Math.min(Math.max(t, 0), 1);
-  const n = heatmap.length - 1;
-  const idx = Math.floor(t * n);
-  const frac = t * n - idx;
-  const c0 = heatmap[idx];
-  const c1 = heatmap[Math.min(idx + 1, n)];
-  return [
-    Math.floor(c0[0] + (c1[0] - c0[0]) * frac),
-    Math.floor(c0[1] + (c1[1] - c0[1]) * frac),
-    Math.floor(c0[2] + (c1[2] - c0[2]) * frac)
-  ];
+  dot(g, x, y, z) {
+    return g[0]*x + g[1]*y + g[2]*z;
+  }
+  noise(xin, yin, zin) {
+    let F3 = 1.0/3.0;
+    let G3 = 1.0/6.0;
+    let n0, n1, n2, n3;
+    let s = (xin+yin+zin)*F3;
+    let i = Math.floor(xin+s);
+    let j = Math.floor(yin+s);
+    let k = Math.floor(zin+s);
+    let t = (i+j+k)*G3;
+    let X0 = i-t;
+    let Y0 = j-t;
+    let Z0 = k-t;
+    let x0 = xin-X0;
+    let y0 = yin-Y0;
+    let z0 = zin-Z0;
+    let i1, j1, k1;
+    let i2, j2, k2;
+    if (x0>=y0) {
+      if (y0>=z0) {i1=1; j1=0; k1=0; i2=1; j2=1; k2=0;}
+      else if (x0>=z0) {i1=1; j1=0; k1=0; i2=1; j2=0; k2=1;}
+      else {i1=0; j1=0; k1=1; i2=1; j2=0; k2=1;}
+    } else {
+      if (y0<z0) {i1=0; j1=0; k1=1; i2=0; j2=1; k2=1;}
+      else if (x0<z0) {i1=0; j1=1; k1=0; i2=0; j2=1; k2=1;}
+      else {i1=0; j1=1; k1=0; i2=1; j2=1; k2=0;}
+    }
+    let x1 = x0 - i1 + G3;
+    let y1 = y0 - j1 + G3;
+    let z1 = z0 - k1 + G3;
+    let x2 = x0 - i2 + 2.0*G3;
+    let y2 = y0 - j2 + 2.0*G3;
+    let z2 = z0 - k2 + 2.0*G3;
+    let x3 = x0 - 1.0 + 3.0*G3;
+    let y3 = y0 - 1.0 + 3.0*G3;
+    let z3 = z0 - 1.0 + 3.0*G3;
+    let ii = i & 255;
+    let jj = j & 255;
+    let kk = k & 255;
+    let gi0 = this.perm[ii+this.perm[jj+this.perm[kk]]] % 12;
+    let gi1 = this.perm[ii+i1+this.perm[jj+j1+this.perm[kk+k1]]] % 12;
+    let gi2 = this.perm[ii+i2+this.perm[jj+j2+this.perm[kk+k2]]] % 12;
+    let gi3 = this.perm[ii+1+this.perm[jj+1+this.perm[kk+1]]] % 12;
+    let t0 = 0.6 - x0*x0 - y0*y0 - z0*z0;
+    if (t0<0) n0 = 0.0;
+    else { t0 *= t0; n0 = t0 * t0 * this.dot(this.grad3[gi0], x0, y0, z0); }
+    let t1 = 0.6 - x1*x1 - y1*y1 - z1*z1;
+    if (t1<0) n1 = 0.0;
+    else { t1 *= t1; n1 = t1 * t1 * this.dot(this.grad3[gi1], x1, y1, z1); }
+    let t2 = 0.6 - x2*x2 - y2*y2 - z2*z2;
+    if (t2<0) n2 = 0.0;
+    else { t2 *= t2; n2 = t2 * t2 * this.dot(this.grad3[gi2], x2, y2, z2); }
+    let t3 = 0.6 - x3*x3 - y3*y3 - z3*z3;
+    if (t3<0) n3 = 0.0;
+    else { t3 *= t3; n3 = t3 * t3 * this.dot(this.grad3[gi3], x3, y3, z3); }
+    return 32.0*(n0 + n1 + n2 + n3);
+  }
 }
 
-function drawHeatmap(time) {
-  const t = time * 0.0005;
+function heatMapColor(value) {
+  // value is 0..1
+  const r = Math.floor(255 * Math.min(1, value * 2));
+  const g = Math.floor(255 * Math.min(1, Math.max(0, value * 2 - 0.5)));
+  const b = Math.floor(255 * Math.max(0, 1 - value * 2));
+  return `rgb(${r},${g},${b})`;
+}
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const noiseGen = new SimplexNoise();
+let cols, rows, cellSize;
+
+function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  cellSize = Math.min(canvas.width, canvas.height) / 100;
+  cols = Math.ceil(canvas.width / cellSize);
+  rows = Math.ceil(canvas.height / cellSize);
+}
+window.addEventListener('resize', resize);
+resize();
 
-  const cellSize = Math.max(canvas.width, canvas.height) / 100;
-  const cols = Math.floor(canvas.width / cellSize);
-  const rows = Math.floor(canvas.height / cellSize);
-
-  ctx.imageSmoothingEnabled = false;
-
+function draw(t) {
+  const time = t * 0.0003;
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
-      const n = noise(x * 0.04 + t, y * 0.04 + t);
-      const vNoise = (n + 1) / 2; // 0..1
-
-      const gradient = x / cols * 0.5 + y / rows * 0.5;
-
-      const value = Math.min(Math.max(vNoise + gradient * 0.5, 0), 1);
-
-      const [r, g, b] = getColorFromPalette(value);
-
-      ctx.fillStyle = `rgb(${r},${g},${b})`;
-      ctx.fillRect(Math.round(x * cellSize), Math.round(y * cellSize), Math.ceil(cellSize), Math.ceil(cellSize));
+      const n = noiseGen.noise(x * 0.04, y * 0.04, time) * 0.5 + 0.5;
+      ctx.fillStyle = heatMapColor(n);
+      ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
   }
-
-  requestAnimationFrame(drawHeatmap);
+  requestAnimationFrame(draw);
 }
-
-requestAnimationFrame(drawHeatmap);
+requestAnimationFrame(draw);
