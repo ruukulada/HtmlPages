@@ -3,7 +3,7 @@ class SimplexNoise {
     this.grad3 = [
       [1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
       [1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
-      [0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]
+      [0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1],
     ];
     this.p = [];
     for (let i = 0; i < 256; i++) {
@@ -22,7 +22,7 @@ class SimplexNoise {
       [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
       [2,3,0,1],[2,0,1,3],[2,1,3,0],[2,1,0,3],
       [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-      [3,0,1,2],[3,0,2,1],[3,1,2,0],[3,1,0,2]
+      [3,0,1,2],[3,0,2,1],[3,1,2,0],[3,1,0,2],
     ];
   }
   dot(g, x, y, z) {
@@ -87,12 +87,19 @@ class SimplexNoise {
 }
 
 function heatMapColor(value) {
-  // value is 0..1
   const r = Math.floor(255 * Math.min(1, value * 2));
   const g = Math.floor(255 * Math.min(1, Math.max(0, value * 2 - 0.5)));
   const b = Math.floor(255 * Math.max(0, 1 - value * 2));
   return `rgb(${r},${g},${b})`;
 }
+
+let size = 1;
+let speed = 1;
+const params = new URLSearchParams(window.location.search);
+const paramSize = parseFloat(params.get("size"));
+size = !isNaN(paramSize) ? paramSize : size;
+const paramSpeed = parseFloat(params.get("speed"));
+speed = !isNaN(paramSpeed) ? paramSpeed : speed;
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -110,10 +117,10 @@ window.addEventListener('resize', resize);
 resize();
 
 function draw(t) {
-  const time = t * 0.0003;
+  const time = t * 0.0003 * speed;
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
-      const n = noiseGen.noise(x * 0.04, y * 0.04, time) * 0.5 + 0.5;
+      const n = noiseGen.noise(x * 0.04 / size, y * 0.04 / size, time) * 0.5 + 0.5;
       ctx.fillStyle = heatMapColor(n);
       ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
