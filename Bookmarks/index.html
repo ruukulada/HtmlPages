@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bookmarks</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14'>🔖</text></svg>">
+</head>
+<body>
+
+<script type="application/json" id="bookmark-data">
+[{
+  "name": "Speed Test",
+  "icon": "icons/google.png",
+  "url": "https://www.google.com/search?q=speed+test"
+},{
+  "name": "Chrome RDP",
+  "icon": "icons/rdp.png",
+  "url": "https://remotedesktop.google.com/access"
+},{
+  "name": "Gmail",
+  "icon": "icons/gmail.png",
+  "url": "https://mail.google.com/mail/u/0/#inbox"
+},{
+  "name": "Home",
+  "icon": "icons/home.png",
+  "url": "http://home.google.com/"
+},{
+  "name": "News",
+  "icon": "icons/news.png",
+  "url": "https://news.google.com/home"
+},{
+  "name": "Photos",
+  "icon": "icons/photos.png",
+  "url": "https://photos.google.com/"
+},{
+  "name": "Translate",
+  "icon": "icons/translate.png",
+  "url": "https://translate.google.com/"
+},{
+  "name": "Twitch",
+  "icon": "icons/twitch.png",
+  "url": "https://www.twitch.tv/directory"
+},{
+  "name": "Music",
+  "icon": "icons/music.png",
+  "url": "https://music.youtube.com/"
+},{
+  "name": "YouTube",
+  "icon": "icons/youtube.png",
+  "url": "https://www.youtube.com/"
+},{
+  "name": "KSF Servers",
+  "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14' font-size='14'>🌊</text></svg>",
+  "url": "https://ruukulada.github.io/HtmlPages/KsfServers/"
+},{
+  "name": "Steam Chat",
+  "icon": "icons/steam.png",
+  "url": "https://steamcommunity.com/chat"
+}]
+</script>
+
+<template id="bookmark-template">
+  <a class="bookmark">
+    <img><span></span>
+  </a>
+</template>
+
+<div id="bookmark-list"></div>
+
+<script>
+  const data = JSON.parse(document.getElementById("bookmark-data").textContent);
+  const tpl = document.getElementById("bookmark-template");
+  const fragment = document.createDocumentFragment();
+  for (const {name, icon, url} of data) {
+    const node = tpl.content.cloneNode(true);
+    const link = node.querySelector("a");
+    link.href = url;
+    link.children[0].src = icon;
+    link.children[1].textContent = name;
+    fragment.appendChild(node);
+  }
+  const list = document.getElementById("bookmark-list");
+  list.appendChild(fragment);
+</script>
+
+</body>
+</html>

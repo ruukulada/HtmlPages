@@ -1,0 +1,23 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #282A36;
+  padding: 20px;
+}
+.bookmark {
+  display: flex;
+  align-items: center;
+  margin: 6px 0;
+}
+.bookmark img {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+a {
+  color: #6272A4;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
