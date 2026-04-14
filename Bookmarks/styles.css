@@ -1,6 +1,6 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #32202F;
+  font-family: Verdana, sans-serif;
+  background: rgb(25,12,12);
   padding: 20px;
 }
 .bookmark {
@@ -14,7 +14,7 @@ body {
   margin-right: 8px;
 }
 a {
-  color: #EADFE3;
+  color: rgb(209,154,102);
   text-decoration: none;
 }
 a:hover {
